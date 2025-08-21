@@ -9,6 +9,8 @@ def main(input_file) -> None:
     date_scans_started = datetime.now()
 
     # First create the scan requests for each server that we want to scan
+    all_scan_requests = []
+
     try:
 #        all_scan_requests = [
 #            ServerScanRequest(server_location=ServerNetworkLocation(hostname="google.com.au")),
@@ -18,10 +20,12 @@ def main(input_file) -> None:
         # Load hostnames from CSV or TXT (one host per line)
         with open(input_file, "r") as f:
             reader = csv.reader(f)
-            all_scan_requests = [row[0].strip() for row in reader if row]
-        except ServerHostnameCouldNotBeResolved:
-        # Handle bad input ie. invalid hostnames
-            print("Error resolving the supplied hostnames")
+            url_scan = [row[0].strip() for row in reader if row]
+            all_scan_requests.append(ServerScanRequest(server_location=ServerNetworkLocation(hostname=url_scan)))
+    
+    except ServerHostnameCouldNotBeResolved:
+    # Handle bad input ie. invalid hostnames
+        print("Error resolving the supplied hostnames")
         return
 
     # Then queue all the scans
@@ -120,4 +124,4 @@ def example_json_result_output(
     json_output_as_str = json_output.model_dump_json()
     json_file_out.write_text(json_output_as_str)
 
-main(hosts.csv)
+main('hosts.csv')
