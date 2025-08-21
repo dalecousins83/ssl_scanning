@@ -3,7 +3,7 @@ from sslyze import *
 from pathlib import Path
 import csv
 
-def main() -> None:
+def main(input_file) -> None:
     print("=> Starting the scans")
     #date_scans_started = datetime.now(timezone.utc)
     date_scans_started = datetime.now()
@@ -120,4 +120,4 @@ def example_json_result_output(
     json_output_as_str = json_output.model_dump_json()
     json_file_out.write_text(json_output_as_str)
 
-main()
+main(hosts.csv)
