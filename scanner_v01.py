@@ -1,6 +1,7 @@
 from datetime import datetime
 from sslyze import *
 from pathlib import Path
+import csv
 
 def main() -> None:
     print("=> Starting the scans")
@@ -9,13 +10,18 @@ def main() -> None:
 
     # First create the scan requests for each server that we want to scan
     try:
-        all_scan_requests = [
-            ServerScanRequest(server_location=ServerNetworkLocation(hostname="google.com.au")),
-            ServerScanRequest(server_location=ServerNetworkLocation(hostname="dalecousins.info")),
-        ]
-    except ServerHostnameCouldNotBeResolved:
+#        all_scan_requests = [
+#            ServerScanRequest(server_location=ServerNetworkLocation(hostname="google.com.au")),
+#            ServerScanRequest(server_location=ServerNetworkLocation(hostname="dalecousins.info")),
+#        ]
+        
+        # Load hostnames from CSV or TXT (one host per line)
+        with open(input_file, "r") as f:
+            reader = csv.reader(f)
+            all_scan_requests = [row[0].strip() for row in reader if row]
+        except ServerHostnameCouldNotBeResolved:
         # Handle bad input ie. invalid hostnames
-        print("Error resolving the supplied hostnames")
+            print("Error resolving the supplied hostnames")
         return
 
     # Then queue all the scans
