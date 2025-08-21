@@ -20,8 +20,7 @@ def main(input_file) -> None:
         # Load hostnames from CSV or TXT (one host per line)
         with open(input_file, "r") as f:
             reader = csv.reader(f)
-            url_scan = [row[0].strip() for row in reader if row]
-            all_scan_requests.append(ServerScanRequest(server_location=ServerNetworkLocation(hostname=url_scan)))
+            hosts = [row[0].strip() for row in reader if row]
     
     except ServerHostnameCouldNotBeResolved:
     # Handle bad input ie. invalid hostnames
@@ -30,7 +29,12 @@ def main(input_file) -> None:
 
     # Then queue all the scans
     scanner = Scanner()
-    scanner.queue_scans(all_scan_requests)
+    #scanner.queue_scans(all_scan_requests)
+    
+    for host in hosts:
+        print(f"[*] Scanning {host} ...")
+        request = ServerScanRequest(server_location=(host, 443))
+        scanner.queue_scan(request)
 
     # And retrieve and process the results for each server
     all_server_scan_results = []
