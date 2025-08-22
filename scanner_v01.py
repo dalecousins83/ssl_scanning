@@ -5,46 +5,41 @@ import csv
 
 def main(input_file) -> None:
     print("=> Starting the scans")
-    #date_scans_started = datetime.now(timezone.utc)
     date_scans_started = datetime.now()
 
-    # First create the scan requests for each server that we want to scan
+    # Create the scan objects for use
     all_scan_requests = []
+    all_server_scan_results = []
 
-    try:
-#        all_scan_requests = [
-#            ServerScanRequest(server_location=ServerNetworkLocation(hostname="google.com.au")),
-#            ServerScanRequest(server_location=ServerNetworkLocation(hostname="dalecousins.info")),
-#        ]
-        
+    try:        
         # Load hostnames from CSV or TXT (one host per line)
         with open(input_file, "r") as f:
             reader = csv.reader(f)
             hosts = [row[0].strip() for row in reader if row]
+            #print(hosts)
     
     except ServerHostnameCouldNotBeResolved:
     # Handle bad input ie. invalid hostnames
         print("Error resolving the supplied hostnames")
         return
 
-    # Then queue all the scans
-    scanner = Scanner()
-    #scanner.queue_scans(all_scan_requests)
-    
     for host in hosts:
         print(f"[*] Scanning {host} ...")
-        request = ServerScanRequest(server_location=(host, 443))
-        scanner.queue_scan(request)
+        request = ServerScanRequest(server_location=ServerNetworkLocation(hostname=host))
+        all_scan_requests.append(request)
+             
 
+    # Then queue all the scans
+    scanner = Scanner()
+    scanner.queue_scans(all_scan_requests) 
+      
     # And retrieve and process the results for each server
-    all_server_scan_results = []
     for server_scan_result in scanner.get_results():
         all_server_scan_results.append(server_scan_result)
         print(f"\n\n****Results for {server_scan_result.server_location.hostname}****")
 
         # Were we able to connect to the server and run the scan?
         if server_scan_result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-            # No we weren't
             print(
                 f"\nError: Could not connect to {server_scan_result.server_location.hostname}:"
                 f" {server_scan_result.connectivity_error_trace}"
@@ -108,7 +103,7 @@ def main(input_file) -> None:
 
         # etc... Other scan command results to process are in server_scan_result.scan_result
 
-    # Lastly, save the all the results to a JSON file
+    #Save the all the results to a JSON file
     json_file_out = Path("api_sample_results.json")
     print(f"\n\n=> Saving scan results to {json_file_out}")
     example_json_result_output(json_file_out, all_server_scan_results, date_scans_started, datetime.now())
